@@ -12,7 +12,7 @@ import (
 type Consumer[MessType any] struct {
 	// 交给子类初始化
 	Decoder           datas.Decoder[MessType]
-	Consumer          *nsq.Consumer
+	consumer          *nsq.Consumer
 	NsqLookupdAddress string
 }
 
@@ -37,11 +37,11 @@ func (c *Consumer[M]) Start(handler Handler[M]) error {
 		}
 		return nil
 	}
-	c.Consumer.AddHandler(nsq.HandlerFunc(h))
+	c.consumer.AddHandler(nsq.HandlerFunc(h))
 
 	// Use nsqlookupd to discover nsqd instances.
 	// See also ConnectToNSQD, ConnectToNSQDs, ConnectToNSQLookupds.
-	err := c.Consumer.ConnectToNSQLookupd(c.NsqLookupdAddress)
+	err := c.consumer.ConnectToNSQLookupd(c.NsqLookupdAddress)
 	if err != nil {
 		return fmt.Errorf("consumer failed to connect to nsq lookup damon: %w", err)
 	}
@@ -49,8 +49,8 @@ func (c *Consumer[M]) Start(handler Handler[M]) error {
 }
 
 func (c *Consumer[MessType]) Stop() chan int {
-	c.Consumer.Stop()
-	return c.Consumer.StopChan
+	c.consumer.Stop()
+	return c.consumer.StopChan
 }
 
 type ReceiveConsumer = Consumer[*datas.Receive]

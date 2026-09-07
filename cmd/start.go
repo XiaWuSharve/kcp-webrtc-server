@@ -28,16 +28,17 @@ var startCmd = &cobra.Command{
 	Long:  ``,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		config.Bind(cmd)
-		node, err := snowflake.NewNode(config.Cfg.NodeId)
+		node, err := snowflake.NewNode(config.Server.NodeId)
 		if err != nil {
 			panic(err)
 		}
 		datas.Ids = node
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		protocol := config.Cfg.Protocol
-		host := config.Cfg.Host
-		port := config.Cfg.Port
+		cfg := config.Server
+		protocol := cfg.Protocol
+		host := cfg.Host
+		port := cfg.Port
 		var s server.Server
 		var listener net.Listener
 		var err error
@@ -56,7 +57,7 @@ var startCmd = &cobra.Command{
 				slog.Error("cannot create listener", "err", err)
 				// 处理错误...
 			}
-			s = server.NewWebSocketServer(config.Cfg.ReadBufferSize, config.Cfg.WriteBufferSize)
+			s = server.NewWebSocketServer(cfg.ReadBufferSize, cfg.WriteBufferSize)
 		default:
 			slog.Error("protocol param cannot be", "value", protocol)
 			return

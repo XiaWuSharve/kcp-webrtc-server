@@ -31,7 +31,7 @@ func (mq *Mq[T]) CreateConsumer(nsqLookupdAddress string) (*Consumer[T], error) 
 	}
 	return &Consumer[T]{
 		Decoder:           mq.Decoder,
-		Consumer:          consumer,
+		consumer:          consumer,
 		NsqLookupdAddress: nsqLookupdAddress,
 	}, nil
 }

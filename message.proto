@@ -9,21 +9,21 @@ option optimize_for = LITE_RUNTIME;
 
 enum MessageType {
   MESSAGE_TYPE_UNSPECIFIED = 0;
-  CONNECT                  = 1 [deprecated = true]; 
-  DEPRECATED_CHAT                     = 2 [deprecated = true];
-  DEPRECATED_CANDIDATE                = 3 [deprecated = true];
-  FETCH = 4;
-  ACK = 5;
-  NORMAL = 6;
+  CONNECT                  = 1 [deprecated = true];
+  DEPRECATED_CHAT          = 2 [deprecated = true];
+  DEPRECATED_CANDIDATE     = 3 [deprecated = true];
+  FETCH                    = 4;
+  ACK                      = 5;
+  NORMAL                   = 6;
 }
 
 enum NormalType {
   NORMAL_TYPE_UNSPECIFIED = 0;
-  CHAT = 1;
-  HELLO = 2;
-  CALL = 3;
-  ANSWER = 4;
-  CANDIDATE = 5;
+  CHAT                    = 1;
+  HELLO                   = 2;
+  CALL                    = 3;
+  ANSWER                  = 4;
+  CANDIDATE               = 5;
 }
 
 enum AckStatus {
@@ -34,18 +34,19 @@ enum AckStatus {
 }
 
 message Message {
-  MessageType type = 1;
-  string sender_id    = 2;
-  string receiver_id  = 3;
-  int64  created_time = 4;
-  string message_id   = 11;
-  int64 conn_id = 12;
+  MessageType type         = 1;
+  string      sender_id    = 2;
+  string      receiver_id  = 3;
+  int64       created_time = 4;
+  string      message_id   = 11;
+  int64       conn_id      = 12;
+  
   oneof type2 {
-    NormalType normal = 13;
-    AckStatus ack_status = 14;
-  }
+    NormalType normal     = 13;
+    AckStatus  ack_status = 14;
+  } // enabled when type = normal or ack
   oneof data {
-    Ack ack = 6;
+    Ack       ack       = 6;
     Connect   connect   = 5 [deprecated = true];
     Candidate candidate = 7;
     Chat      chat      = 8;
@@ -86,8 +87,8 @@ message Chat {
 enum MessageUnitType {
   MESSAGE_UNIT_TYPE_UNSPECIFIED = 0;  // proto3 要求第一个值为 0
   TEXT                          = 1;
-  CALL_UNIT                          = 2;
-  ANSWER_UNIT                        = 3;
+  CALL_UNIT                     = 2;
+  ANSWER_UNIT                   = 3;
   ESTABLISH                     = 4;
 }
 
