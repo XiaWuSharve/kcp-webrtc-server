@@ -62,7 +62,7 @@ func ValidateTime(createdTime int64) bool {
 	if diff < 0 {
 		diff = -diff
 	}
-	if diff > config.Cfg.TimeTolerance*1000 { // 5分钟对应的毫秒数
+	if diff > config.Server.TimeTolerance*1000 { // 5分钟对应的毫秒数
 		return false
 	}
 	return true
