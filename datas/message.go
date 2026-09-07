@@ -1,36 +1,38 @@
 package datas
 
 import (
+	"github.com/bwmarrin/snowflake"
 	"google.golang.org/protobuf/proto"
 )
 
-type MessageEncoder struct {
-	Bytes []byte
+type MMessage struct {
+	Message *Message
+	bytes   []byte
 }
 
 // GetRequiredBufLen implements [Encodable].
-func (p *MessageEncoder) GetRequiredBufLen() int {
+func (p *MMessage) GetRequiredBufLen() int {
 	panic("unimplemented")
 }
 
-var _ Encodable = (*MessageEncoder)(nil)
+var _ Encodable = (*MMessage)(nil)
 
-func (p *MessageEncoder) ToByte() []byte {
-	// p.Bytes, _ = proto.Marshal(mess)
-	return p.Bytes
+func (p *MMessage) ToByte() []byte {
+	p.bytes, _ = proto.Marshal(p.Message)
+	return p.bytes
 }
 
-type MessageParser struct {
-	message Message
+type MessageDecoder struct {
+	message *Message
 }
 
-var _ Decoder[*Message] = (*MessageParser)(nil)
+var _ Decoder[*Message] = (*MessageDecoder)(nil)
 
-func (mp *MessageParser) Parse(data []byte) (*Message, error) {
-	if err := proto.Unmarshal(data, &mp.message); err != nil {
+func (mp *MessageDecoder) Parse(data []byte) (*Message, error) {
+	if err := proto.Unmarshal(data, mp.message); err != nil {
 		return nil, err
 	}
-	return &mp.message, nil
+	return mp.message, nil
 }
 
 // type Message2SendFrame struct {
@@ -52,8 +54,8 @@ func (mp *MessageParser) Parse(data []byte) (*Message, error) {
 // 	return &m2f.frame, nil
 // }
 
-// var Ids *snowflake.Node
+var Ids *snowflake.Node
 
-// func GenId() int64 {
-// 	return Ids.Generate().Int64()
-// }
+func GenId() int64 {
+	return Ids.Generate().Int64()
+}
