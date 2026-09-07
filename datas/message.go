@@ -6,8 +6,8 @@ import (
 )
 
 type MMessage struct {
-	Message *Message
-	bytes   []byte
+	Message
+	bytes []byte
 }
 
 // GetRequiredBufLen implements [Encodable].
@@ -18,21 +18,21 @@ func (p *MMessage) GetRequiredBufLen() int {
 var _ Encodable = (*MMessage)(nil)
 
 func (p *MMessage) ToByte() []byte {
-	p.bytes, _ = proto.Marshal(p.Message)
+	p.bytes, _ = proto.Marshal(p)
 	return p.bytes
 }
 
 type MessageDecoder struct {
-	message *Message
+	message MMessage
 }
 
-var _ Decoder[*Message] = (*MessageDecoder)(nil)
+var _ Decoder[*MMessage] = (*MessageDecoder)(nil)
 
-func (mp *MessageDecoder) Parse(data []byte) (*Message, error) {
-	if err := proto.Unmarshal(data, mp.message); err != nil {
+func (mp *MessageDecoder) Parse(data []byte) (*MMessage, error) {
+	if err := proto.Unmarshal(data, &mp.message); err != nil {
 		return nil, err
 	}
-	return mp.message, nil
+	return &mp.message, nil
 }
 
 // type Message2SendFrame struct {
@@ -54,8 +54,8 @@ func (mp *MessageDecoder) Parse(data []byte) (*Message, error) {
 // 	return &m2f.frame, nil
 // }
 
-var Ids *snowflake.Node
-
 func GenId() int64 {
 	return Ids.Generate().Int64()
 }
+
+var Ids *snowflake.Node
