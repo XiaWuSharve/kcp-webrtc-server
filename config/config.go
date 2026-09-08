@@ -18,6 +18,7 @@ type Config struct {
 }
 
 type ServerConfig struct {
+	// kcp, websocket, all
 	Protocol        string `mapstructure:"protocol"`
 	Host            string `mapstructure:"host"`
 	Port            int    `mapstructure:"port"`

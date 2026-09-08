@@ -12,9 +12,10 @@ enum MessageType {
   CONNECT                  = 1 [deprecated = true];
   DEPRECATED_CHAT          = 2 [deprecated = true];
   DEPRECATED_CANDIDATE     = 3 [deprecated = true];
-  FETCH                    = 4;
+  FETCH                    = 4 [deprecated = true];
   ACK                      = 5;
   NORMAL                   = 6;
+  PULL                     = 7;
 }
 
 enum NormalType {

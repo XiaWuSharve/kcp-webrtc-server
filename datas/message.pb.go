@@ -31,9 +31,11 @@ const (
 	MessageType_DEPRECATED_CHAT MessageType = 2
 	// Deprecated: Marked as deprecated in message.proto.
 	MessageType_DEPRECATED_CANDIDATE MessageType = 3
-	MessageType_FETCH                MessageType = 4
-	MessageType_ACK                  MessageType = 5
-	MessageType_NORMAL               MessageType = 6
+	// Deprecated: Marked as deprecated in message.proto.
+	MessageType_FETCH  MessageType = 4
+	MessageType_ACK    MessageType = 5
+	MessageType_NORMAL MessageType = 6
+	MessageType_PULL   MessageType = 7
 )
 
 // Enum value maps for MessageType.
@@ -46,6 +48,7 @@ var (
 		4: "FETCH",
 		5: "ACK",
 		6: "NORMAL",
+		7: "PULL",
 	}
 	MessageType_value = map[string]int32{
 		"MESSAGE_TYPE_UNSPECIFIED": 0,
@@ -55,6 +58,7 @@ var (
 		"FETCH":                    4,
 		"ACK":                      5,
 		"NORMAL":                   6,
+		"PULL":                     7,
 	}
 )
 
@@ -856,16 +860,17 @@ const file_message_proto_rawDesc = "" +
 	"\rmessage_chain\x18\x03 \x03(\v2\x14.message.MessageUnitR\fmessageChain\"U\n" +
 	"\vMessageUnit\x12,\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x18.message.MessageUnitTypeR\x04type\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage*\x93\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage*\xa1\x01\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x0f\n" +
 	"\aCONNECT\x10\x01\x1a\x02\b\x01\x12\x17\n" +
 	"\x0fDEPRECATED_CHAT\x10\x02\x1a\x02\b\x01\x12\x1c\n" +
-	"\x14DEPRECATED_CANDIDATE\x10\x03\x1a\x02\b\x01\x12\t\n" +
-	"\x05FETCH\x10\x04\x12\a\n" +
+	"\x14DEPRECATED_CANDIDATE\x10\x03\x1a\x02\b\x01\x12\r\n" +
+	"\x05FETCH\x10\x04\x1a\x02\b\x01\x12\a\n" +
 	"\x03ACK\x10\x05\x12\n" +
 	"\n" +
-	"\x06NORMAL\x10\x06*c\n" +
+	"\x06NORMAL\x10\x06\x12\b\n" +
+	"\x04PULL\x10\a*c\n" +
 	"\n" +
 	"NormalType\x12\x1b\n" +
 	"\x17NORMAL_TYPE_UNSPECIFIED\x10\x00\x12\b\n" +

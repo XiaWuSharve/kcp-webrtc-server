@@ -6,27 +6,20 @@ import (
 	"io"
 	"net"
 
-	"github.com/XiaWuSharve/whisperly/datas"
 	"github.com/gorilla/websocket"
 )
 
 type Conn interface {
 	GetId() int64
 	GetReader() io.Reader
-	GetSendChan() chan *datas.RoutedSend
 	Send(data []byte) error
+	Close() error
 }
 
 type KcpConn struct {
 	net.Conn
-	Err      error
-	SendChan chan *datas.RoutedSend
-	Id       int64
-}
-
-// GetSendChan implements [Conn].
-func (c *KcpConn) GetSendChan() chan *datas.RoutedSend {
-	return c.SendChan
+	Err error
+	Id  int64
 }
 
 var _ Conn = (*KcpConn)(nil)
@@ -44,16 +37,10 @@ func (c *KcpConn) GetId() int64 {
 
 type WsConn struct {
 	*websocket.Conn
-	Err      error
-	reader   io.Reader
-	n        int
-	Id       int64
-	SendChan chan *datas.RoutedSend
-}
-
-// GetSendChan implements [Conn].
-func (c *WsConn) GetSendChan() chan *datas.RoutedSend {
-	return c.SendChan
+	Err    error
+	reader io.Reader
+	n      int
+	Id     int64
 }
 
 var _ Conn = (*WsConn)(nil)
