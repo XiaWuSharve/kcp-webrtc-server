@@ -15,8 +15,9 @@ import (
 
 	"github.com/XiaWuSharve/whisperly/config"
 	"github.com/XiaWuSharve/whisperly/datas"
-	"github.com/XiaWuSharve/whisperly/server"
+	"github.com/XiaWuSharve/whisperly/network/server"
 	"github.com/bwmarrin/snowflake"
+	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
 	"github.com/xtaci/kcp-go/v5"
 )
@@ -52,6 +53,10 @@ var startCmd = &cobra.Command{
 			}
 			s = server.NewKcpServer()
 		case "websocket":
+			&websocket.Upgrader{
+				ReadBufferSize:  k.ReadBufferSize,
+				WriteBufferSize: k.WriteBufferSize,
+			}
 			listener, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
 			if err != nil {
 				slog.Error("cannot create listener", "err", err)

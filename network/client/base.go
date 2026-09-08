@@ -2,44 +2,34 @@ package client
 
 import (
 	"bufio"
-	"context"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"net"
 	"sync"
 
 	"github.com/XiaWuSharve/whisperly/datas"
 	"github.com/XiaWuSharve/whisperly/mq"
+	"github.com/XiaWuSharve/whisperly/network/conn"
 )
 
-type Conn interface {
-	GetId() int64
-	GetReader() io.Reader
-	GetSendChan() chan *datas.RoutedSend
-	Send(data []byte) error
-}
-
 type Client struct {
-	Conn
+	conn.Conn
 	wg              sync.WaitGroup
-	Id              int64
-	processProducer mq.Producer
-	storeProducer   mq.Producer
+	ProcessProducer mq.Producer
+	StoreProducer   mq.Producer
 	SendConsumer    mq.Consumer[*datas.Send]
 	ReceiveFrame    *datas.Receive
 	HeaderBytes     [13]byte
-	// TODO ?
-	ACKSend       datas.RoutedSend
-	routedSend    *datas.RoutedSend
-	streamDecoder datas.ReceiveFrameStreamDecoder
-	ReceiveErr    error
-	SendErr       error
-	pool          *ConnPool
-	ok            bool
-	routed2cache  datas.Converter[*datas.RoutedSend, *datas.Cache]
-	cache         *datas.Cache
+	ACKSend         datas.RoutedSend
+	routedSend      *datas.RoutedSend
+	streamDecoder   datas.ReceiveFrameStreamDecoder
+	ReceiveErr      error
+	SendErr         error
+	pool            *conn.ConnPool
+	ok              bool
+	routed2cache    datas.Converter[*datas.RoutedSend, *datas.Cache]
+	cache           *datas.Cache
 }
 
 func NewClient() *Client {
@@ -50,22 +40,22 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) Start(ctx context.Context) int64 {
+func (c *Client) Start(conn conn.Conn) int64 {
 	c.wg.Go(func() {
-		if err := c.HandleSend(ctx); !errors.Is(err, net.ErrClosed) {
+		if err := c.HandleSend(); !errors.Is(err, net.ErrClosed) {
 			slog.Error("failed to handle send", "err", err)
 		}
 	})
 
 	c.wg.Go(func() {
-		if err := c.HandleReceive(ctx); !errors.Is(err, net.ErrClosed) {
+		if err := c.HandleReceive(); !errors.Is(err, net.ErrClosed) {
 			slog.Error("failed to handle receive", "err", err)
 		}
 	})
 	return c.pool.AddConn(c.Conn)
 }
 
-func (c *Client) HandleReceive(ctx context.Context) error {
+func (c *Client) HandleReceive() error {
 	// 只处理与业务无关的连接相关的逻辑
 	reader := bufio.NewReader(c.GetReader())
 	for {
@@ -95,12 +85,12 @@ func (c *Client) HandleReceive(ctx context.Context) error {
 	}
 }
 
-func (c *Client) HandleSend(ctx context.Context) error {
+func (c *Client) HandleSend() error {
 	defer func() {
 		if c.ok {
 			c.cache, c.SendErr = c.routed2cache.Convert(c.routedSend)
 			if c.SendErr != nil {
-				slog.Error("failed to conver routed send to cache: %w", c.SendErr)
+				slog.Error("failed to conver routed send to cache: %w", "err", c.SendErr)
 			}
 			_, c.SendErr = c.storeProducer.Enqueue(c.cache)
 			if c.SendErr != nil {

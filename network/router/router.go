@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"log/slog"
 
 	"github.com/XiaWuSharve/whisperly/client"
@@ -36,7 +37,9 @@ func (r *Router) Handle(frame *datas.Send) error {
 			slog.Error("failed to convert send to cache data", "err", err)
 			return nil
 		}
-		r.storeProducer.Enqueue(cacheData)
+		if _, err := r.storeProducer.Enqueue(cacheData); err != nil {
+			return fmt.Errorf("cannot enqueue store producer: %w", err)
+		}
 	}
 
 	r.HeaderBytes[0] = byte(frame.AckStatus)

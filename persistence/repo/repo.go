@@ -84,6 +84,7 @@ func NewSyncStore() (*SyncStore, error) {
 
 var ErrEmptyStoreArray = errors.New("the len of store array is 0")
 
+// 支持不同ReceiverIds
 func (st *SyncStore) Push(ctx context.Context, stores []*datas.Store) ([]error, error) {
 	if len(stores) == 0 {
 		return nil, ErrEmptyStoreArray
@@ -146,14 +147,14 @@ func (st *SyncStore) Pull(ctx context.Context, receiverId string, msgCount int) 
 	return stores[:trueCount], nil
 }
 
-func (st *SyncStore) Ack(ctx context.Context, receiverId string, ackedFinalSequence int64) error {
+func (st *SyncStore) Ack(ctx context.Context, receiverId string, minSequence int64) error {
 	tm, err := timeline.NewTmLine(receiverId, st.adapter, st.syncStore)
 	if err != nil {
 		return fmt.Errorf("cannot create timeline: %w", err)
 	}
 	it := tm.Scan(&timeline.ScanParameter{
 		From:        math.MaxInt64,
-		To:          ackedFinalSequence,
+		To:          minSequence - 1,
 		BufChanSize: st.BufChanSize,
 	})
 	defer it.Close()
@@ -170,4 +171,8 @@ func (st *SyncStore) Ack(ctx context.Context, receiverId string, ackedFinalSeque
 			return fmt.Errorf("cannot delete %d: %w", entry.Sequence, err)
 		}
 	}
+}
+
+func (st *SyncStore) Close() {
+	st.syncStore.Close()
 }

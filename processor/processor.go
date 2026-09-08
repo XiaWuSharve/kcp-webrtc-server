@@ -28,6 +28,7 @@ func (p *Processor[C]) Handle(frame *datas.Receive) error {
 	slog.Debug("message", "mess", m.String())
 	if err != nil {
 		// FAIL message
+		m.Type = datas.MessageType_ACK
 		m.Data = &datas.Message_Ack{Ack: &datas.Ack{
 			MessageId: m.MessageId,
 			Status:    datas.AckStatus_FAIL,
