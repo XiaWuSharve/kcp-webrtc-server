@@ -14,11 +14,14 @@ import (
 )
 
 type Receive struct {
-	CreatedTime   int64
-	Type          MessageType
-	RequestOffset int64
-	FullBuf       []byte
-	Payload       []byte
+	CreatedTime int64
+	Type        MessageType
+	ReceiverId  string
+	MessageId   int64
+	AckSequence int64
+	PullCount   int32
+	FullBuf     []byte
+	Payload     []byte
 }
 
 var _ Encodable = (*Receive)(nil)
@@ -47,7 +50,7 @@ func (mp *ReceiveDecoder) Parse(data []byte) (*Receive, error) {
 	return &mp.frame, nil
 }
 
-type ReceiveFrameStreamDecoder struct {
+type ReceiveStreamDecoder struct {
 	Rbuf       [12]byte
 	Wbuf       [12]byte
 	frame      Receive
@@ -68,7 +71,7 @@ func ValidateTime(createdTime int64) bool {
 	return true
 }
 
-func (fsd *ReceiveFrameStreamDecoder) Parse(r io.Reader) (*Receive, error) {
+func (fsd *ReceiveStreamDecoder) Parse(r io.Reader) (*Receive, error) {
 	// receive frame |CreatedTime 8B|Len 4B -> 1Unit = 1B|
 	// send frame |AckType 1B|MessageId 8B|Len 4B -> 1Unit = 1B|
 	if _, fsd.Err = io.ReadFull(r, fsd.Rbuf[:]); fsd.Err != nil {
