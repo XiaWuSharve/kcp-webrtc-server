@@ -4,7 +4,6 @@ Copyright © 2025 XiaWuSharve <sharve@foxmail.com>
 package cmd
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"net"
@@ -15,7 +14,8 @@ import (
 
 	"github.com/XiaWuSharve/whisperly/config"
 	"github.com/XiaWuSharve/whisperly/datas"
-	"github.com/XiaWuSharve/whisperly/network/server"
+	"github.com/XiaWuSharve/whisperly/network/conn"
+	"github.com/XiaWuSharve/whisperly/network/listener"
 	"github.com/bwmarrin/snowflake"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cobra"
@@ -40,44 +40,46 @@ var startCmd = &cobra.Command{
 		protocol := cfg.Protocol
 		host := cfg.Host
 		port := cfg.Port
-		var s server.Server
-		var listener net.Listener
-		var err error
+		var l listener.Listener
 		slog.Info("starting...", "protocol", protocol)
 		switch protocol {
 		case "kcp":
-			listener, err = kcp.Listen(host + ":" + strconv.Itoa(port))
+			lis, err := kcp.Listen(host + ":" + strconv.Itoa(port))
 			if err != nil {
 				slog.Error("cannot create listener", "err", err)
 				// 处理错误...
 			}
-			s = server.NewKcpServer()
+			l = &listener.KcpListener{Listener: lis}
 		case "websocket":
-			&websocket.Upgrader{
-				ReadBufferSize:  k.ReadBufferSize,
-				WriteBufferSize: k.WriteBufferSize,
+			upgrader := &websocket.Upgrader{
+				ReadBufferSize:  cfg.ReadBufferSize,
+				WriteBufferSize: cfg.WriteBufferSize,
 			}
-			listener, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
+			lis, err := net.Listen("tcp", host+":"+strconv.Itoa(port))
 			if err != nil {
 				slog.Error("cannot create listener", "err", err)
 				// 处理错误...
 			}
-			s = server.NewWebSocketServer(cfg.ReadBufferSize, cfg.WriteBufferSize)
+			l = &listener.WsListener{
+				Listener: lis,
+				Upgrader: upgrader,
+			}
 		default:
 			slog.Error("protocol param cannot be", "value", protocol)
 			return
 		}
-
+		slog.Info("server starting", "addr", l.Addr().String())
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, os.Interrupt)
 		signal.Notify(sig, syscall.SIGTERM)
-		ctx, cancel := context.WithCancel(context.Background())
 		go func() {
 			<-sig
 			slog.Info("exiting...")
-			cancel()
+			l.Close()
 		}()
-		if err := s.Start(ctx, listener); !errors.Is(err, net.ErrClosed) {
+		connChan := make(chan conn.Conn, cfg.ConnBufSize)
+		defer close(connChan)
+		if err := l.Listen(connChan); !errors.Is(err, net.ErrClosed) {
 			slog.Error("cannot serve", "err", err)
 		}
 	},
