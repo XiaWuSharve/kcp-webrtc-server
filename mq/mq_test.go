@@ -121,7 +121,7 @@ func TestMq(t *testing.T) {
 		t.Fatal("no message consumed")
 	}
 	defer func() {
-		doneChan := consumer.Stop()
+		doneChan := consumer.Close()
 		<-doneChan
 	}()
 }

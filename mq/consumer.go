@@ -9,12 +9,19 @@ import (
 	"github.com/nsqio/go-nsq"
 )
 
+type ConsumerInt[M any] interface {
+	Start(handler Handler[M]) error
+	Close() chan int
+}
+
 type Consumer[MessType any] struct {
 	// 交给子类初始化
 	Decoder           datas.Decoder[MessType]
 	consumer          *nsq.Consumer
 	NsqLookupdAddress string
 }
+
+var _ ConsumerInt[struct{}] = (*Consumer[struct{}])(nil)
 
 type Handler[MessType any] interface {
 	Handle(message MessType) error
@@ -48,7 +55,7 @@ func (c *Consumer[M]) Start(handler Handler[M]) error {
 	return nil
 }
 
-func (c *Consumer[MessType]) Stop() chan int {
+func (c *Consumer[MessType]) Close() chan int {
 	c.consumer.Stop()
 	return c.consumer.StopChan
 }
@@ -56,3 +63,22 @@ func (c *Consumer[MessType]) Stop() chan int {
 type ReceiveConsumer = Consumer[*datas.Receive]
 type SendConsumer = Consumer[*datas.Send]
 type StoreConsumer = Consumer[*datas.Cache]
+
+type ConsumerMock[M any] struct {
+	handler Handler[M]
+}
+
+// Close implements [ConsumerInt].
+func (c *ConsumerMock[M]) Close() chan int {
+	ch := make(chan int)
+	close(ch)
+	return ch
+}
+
+// Start implements [ConsumerInt].
+func (c *ConsumerMock[M]) Start(handler Handler[M]) error {
+	c.handler = handler
+	return nil
+}
+
+var _ ConsumerInt[any] = (*ConsumerMock[any])(nil)
