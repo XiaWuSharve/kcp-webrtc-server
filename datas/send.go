@@ -1,6 +1,7 @@
 package datas
 
 type Send struct {
+	Type       MessageType
 	ReceiverId string
 	AckStatus  AckStatus
 	MessageId  int64
@@ -8,8 +9,8 @@ type Send struct {
 	Payload    []byte
 }
 
-// GetRequiredBufLen implements [Encodable].
-func (s *Send) GetRequiredBufLen() int {
+// GetHeaderLen implements [Encodable].
+func (s *Send) GetHeaderLen() int {
 	panic("unimplemented")
 }
 

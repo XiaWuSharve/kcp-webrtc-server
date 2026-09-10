@@ -6,8 +6,8 @@ type RoutedSend struct {
 	Payload   []byte
 }
 
-// GetRequiredBufLen implements [Encodable].
-func (r *RoutedSend) GetRequiredBufLen() int {
+// GetHeaderLen implements [Encodable].
+func (r *RoutedSend) GetHeaderLen() int {
 	return 1
 }
 

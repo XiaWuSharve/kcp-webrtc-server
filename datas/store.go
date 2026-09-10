@@ -9,8 +9,8 @@ type Store struct {
 	Payload     []byte
 }
 
-// GetRequiredBufLen implements [Encodable].
-func (s *Store) GetRequiredBufLen() int {
+// GetHeaderLen implements [Encodable].
+func (s *Store) GetHeaderLen() int {
 	panic("unimplemented")
 }
 

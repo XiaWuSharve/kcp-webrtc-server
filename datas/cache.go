@@ -6,8 +6,8 @@ type Cache struct {
 	Payload   []byte
 }
 
-// GetRequiredBufLen implements [Encodable].
-func (c *Cache) GetRequiredBufLen() int {
+// GetHeaderLen implements [Encodable].
+func (c *Cache) GetHeaderLen() int {
 	panic("unimplemented")
 }
 

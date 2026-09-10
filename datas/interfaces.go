@@ -2,7 +2,7 @@ package datas
 
 type Encodable interface {
 	ToByte() []byte
-	GetRequiredBufLen() int
+	GetHeaderLen() int
 }
 
 type Converter[S, D any] interface {
