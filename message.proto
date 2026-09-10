@@ -39,9 +39,9 @@ message Message {
   string      sender_id    = 2;
   string      receiver_id  = 3;
   int64       created_time = 4;
-  string      message_id   = 11;
   int64       conn_id      = 12;
-  
+  int64       message_id   = 15;
+
   oneof type2 {
     NormalType normal     = 13;
     AckStatus  ack_status = 14;
@@ -53,7 +53,13 @@ message Message {
     Chat      chat      = 8;
     Sdp       call      = 9;
     Sdp       answer    = 10;
+    Pull      pull      = 11;
   }
+}
+
+message Pull {
+  int64 ack_sequence = 1;
+  int32 pull_count   = 2;
 }
 
 message Sdp {
@@ -67,7 +73,7 @@ message Connect {
 }
 
 message Ack {
-  AckStatus status     = 1;
+  AckStatus status     = 1 [deprecated = true];
   string    reason     = 3;
   string    message_id = 2 [deprecated = true];
 }

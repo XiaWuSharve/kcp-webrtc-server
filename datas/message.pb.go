@@ -261,8 +261,8 @@ type Message struct {
 	SenderId    string                 `protobuf:"bytes,2,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
 	ReceiverId  string                 `protobuf:"bytes,3,opt,name=receiver_id,json=receiverId,proto3" json:"receiver_id,omitempty"`
 	CreatedTime int64                  `protobuf:"varint,4,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
-	MessageId   string                 `protobuf:"bytes,11,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	ConnId      int64                  `protobuf:"varint,12,opt,name=conn_id,json=connId,proto3" json:"conn_id,omitempty"`
+	MessageId   int64                  `protobuf:"varint,15,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	// Types that are valid to be assigned to Type2:
 	//
 	//	*Message_Normal
@@ -276,6 +276,7 @@ type Message struct {
 	//	*Message_Chat
 	//	*Message_Call
 	//	*Message_Answer
+	//	*Message_Pull
 	Data          isMessage_Data `protobuf_oneof:"data"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -339,16 +340,16 @@ func (x *Message) GetCreatedTime() int64 {
 	return 0
 }
 
-func (x *Message) GetMessageId() string {
-	if x != nil {
-		return x.MessageId
-	}
-	return ""
-}
-
 func (x *Message) GetConnId() int64 {
 	if x != nil {
 		return x.ConnId
+	}
+	return 0
+}
+
+func (x *Message) GetMessageId() int64 {
+	if x != nil {
+		return x.MessageId
 	}
 	return 0
 }
@@ -440,6 +441,15 @@ func (x *Message) GetAnswer() *Sdp {
 	return nil
 }
 
+func (x *Message) GetPull() *Pull {
+	if x != nil {
+		if x, ok := x.Data.(*Message_Pull); ok {
+			return x.Pull
+		}
+	}
+	return nil
+}
+
 type isMessage_Type2 interface {
 	isMessage_Type2()
 }
@@ -485,6 +495,10 @@ type Message_Answer struct {
 	Answer *Sdp `protobuf:"bytes,10,opt,name=answer,proto3,oneof"`
 }
 
+type Message_Pull struct {
+	Pull *Pull `protobuf:"bytes,11,opt,name=pull,proto3,oneof"`
+}
+
 func (*Message_Ack) isMessage_Data() {}
 
 func (*Message_Connect) isMessage_Data() {}
@@ -497,6 +511,60 @@ func (*Message_Call) isMessage_Data() {}
 
 func (*Message_Answer) isMessage_Data() {}
 
+func (*Message_Pull) isMessage_Data() {}
+
+type Pull struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AckSequence   int64                  `protobuf:"varint,1,opt,name=ack_sequence,json=ackSequence,proto3" json:"ack_sequence,omitempty"`
+	PullCount     int32                  `protobuf:"varint,2,opt,name=pull_count,json=pullCount,proto3" json:"pull_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Pull) Reset() {
+	*x = Pull{}
+	mi := &file_message_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Pull) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Pull) ProtoMessage() {}
+
+func (x *Pull) ProtoReflect() protoreflect.Message {
+	mi := &file_message_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Pull.ProtoReflect.Descriptor instead.
+func (*Pull) Descriptor() ([]byte, []int) {
+	return file_message_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Pull) GetAckSequence() int64 {
+	if x != nil {
+		return x.AckSequence
+	}
+	return 0
+}
+
+func (x *Pull) GetPullCount() int32 {
+	if x != nil {
+		return x.PullCount
+	}
+	return 0
+}
+
 type Sdp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Sdp           string                 `protobuf:"bytes,2,opt,name=sdp,proto3" json:"sdp,omitempty"`
@@ -506,7 +574,7 @@ type Sdp struct {
 
 func (x *Sdp) Reset() {
 	*x = Sdp{}
-	mi := &file_message_proto_msgTypes[1]
+	mi := &file_message_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -518,7 +586,7 @@ func (x *Sdp) String() string {
 func (*Sdp) ProtoMessage() {}
 
 func (x *Sdp) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[1]
+	mi := &file_message_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +599,7 @@ func (x *Sdp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Sdp.ProtoReflect.Descriptor instead.
 func (*Sdp) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{1}
+	return file_message_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Sdp) GetSdp() string {
@@ -553,7 +621,7 @@ type Connect struct {
 
 func (x *Connect) Reset() {
 	*x = Connect{}
-	mi := &file_message_proto_msgTypes[2]
+	mi := &file_message_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -565,7 +633,7 @@ func (x *Connect) String() string {
 func (*Connect) ProtoMessage() {}
 
 func (x *Connect) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[2]
+	mi := &file_message_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -578,7 +646,7 @@ func (x *Connect) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Connect.ProtoReflect.Descriptor instead.
 func (*Connect) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{2}
+	return file_message_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Connect) GetDisplayName() string {
@@ -589,9 +657,10 @@ func (x *Connect) GetDisplayName() string {
 }
 
 type Ack struct {
-	state  protoimpl.MessageState `protogen:"open.v1"`
-	Status AckStatus              `protobuf:"varint,1,opt,name=status,proto3,enum=message.AckStatus" json:"status,omitempty"`
-	Reason string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Deprecated: Marked as deprecated in message.proto.
+	Status AckStatus `protobuf:"varint,1,opt,name=status,proto3,enum=message.AckStatus" json:"status,omitempty"`
+	Reason string    `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
 	// Deprecated: Marked as deprecated in message.proto.
 	MessageId     string `protobuf:"bytes,2,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -600,7 +669,7 @@ type Ack struct {
 
 func (x *Ack) Reset() {
 	*x = Ack{}
-	mi := &file_message_proto_msgTypes[3]
+	mi := &file_message_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -612,7 +681,7 @@ func (x *Ack) String() string {
 func (*Ack) ProtoMessage() {}
 
 func (x *Ack) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[3]
+	mi := &file_message_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -625,9 +694,10 @@ func (x *Ack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Ack.ProtoReflect.Descriptor instead.
 func (*Ack) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{3}
+	return file_message_proto_rawDescGZIP(), []int{4}
 }
 
+// Deprecated: Marked as deprecated in message.proto.
 func (x *Ack) GetStatus() AckStatus {
 	if x != nil {
 		return x.Status
@@ -661,7 +731,7 @@ type Candidate struct {
 
 func (x *Candidate) Reset() {
 	*x = Candidate{}
-	mi := &file_message_proto_msgTypes[4]
+	mi := &file_message_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -673,7 +743,7 @@ func (x *Candidate) String() string {
 func (*Candidate) ProtoMessage() {}
 
 func (x *Candidate) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[4]
+	mi := &file_message_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -686,7 +756,7 @@ func (x *Candidate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Candidate.ProtoReflect.Descriptor instead.
 func (*Candidate) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{4}
+	return file_message_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Candidate) GetSdpMid() string {
@@ -721,7 +791,7 @@ type Chat struct {
 
 func (x *Chat) Reset() {
 	*x = Chat{}
-	mi := &file_message_proto_msgTypes[5]
+	mi := &file_message_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -733,7 +803,7 @@ func (x *Chat) String() string {
 func (*Chat) ProtoMessage() {}
 
 func (x *Chat) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[5]
+	mi := &file_message_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -746,7 +816,7 @@ func (x *Chat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Chat.ProtoReflect.Descriptor instead.
 func (*Chat) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{5}
+	return file_message_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Chat) GetDisplayName() string {
@@ -774,7 +844,7 @@ type MessageUnit struct {
 
 func (x *MessageUnit) Reset() {
 	*x = MessageUnit{}
-	mi := &file_message_proto_msgTypes[6]
+	mi := &file_message_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -786,7 +856,7 @@ func (x *MessageUnit) String() string {
 func (*MessageUnit) ProtoMessage() {}
 
 func (x *MessageUnit) ProtoReflect() protoreflect.Message {
-	mi := &file_message_proto_msgTypes[6]
+	mi := &file_message_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -799,7 +869,7 @@ func (x *MessageUnit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageUnit.ProtoReflect.Descriptor instead.
 func (*MessageUnit) Descriptor() ([]byte, []int) {
-	return file_message_proto_rawDescGZIP(), []int{6}
+	return file_message_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *MessageUnit) GetType() MessageUnitType {
@@ -820,16 +890,16 @@ var File_message_proto protoreflect.FileDescriptor
 
 const file_message_proto_rawDesc = "" +
 	"\n" +
-	"\rmessage.proto\x12\amessage\"\xba\x04\n" +
+	"\rmessage.proto\x12\amessage\"\xdf\x04\n" +
 	"\aMessage\x12(\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x14.message.MessageTypeR\x04type\x12\x1b\n" +
 	"\tsender_id\x18\x02 \x01(\tR\bsenderId\x12\x1f\n" +
 	"\vreceiver_id\x18\x03 \x01(\tR\n" +
 	"receiverId\x12!\n" +
-	"\fcreated_time\x18\x04 \x01(\x03R\vcreatedTime\x12\x1d\n" +
+	"\fcreated_time\x18\x04 \x01(\x03R\vcreatedTime\x12\x17\n" +
+	"\aconn_id\x18\f \x01(\x03R\x06connId\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\v \x01(\tR\tmessageId\x12\x17\n" +
-	"\aconn_id\x18\f \x01(\x03R\x06connId\x12-\n" +
+	"message_id\x18\x0f \x01(\x03R\tmessageId\x12-\n" +
 	"\x06normal\x18\r \x01(\x0e2\x13.message.NormalTypeH\x00R\x06normal\x123\n" +
 	"\n" +
 	"ack_status\x18\x0e \x01(\x0e2\x12.message.AckStatusH\x00R\tackStatus\x12 \n" +
@@ -839,15 +909,20 @@ const file_message_proto_rawDesc = "" +
 	"\x04chat\x18\b \x01(\v2\r.message.ChatH\x01R\x04chat\x12\"\n" +
 	"\x04call\x18\t \x01(\v2\f.message.SdpH\x01R\x04call\x12&\n" +
 	"\x06answer\x18\n" +
-	" \x01(\v2\f.message.SdpH\x01R\x06answerB\a\n" +
+	" \x01(\v2\f.message.SdpH\x01R\x06answer\x12#\n" +
+	"\x04pull\x18\v \x01(\v2\r.message.PullH\x01R\x04pullB\a\n" +
 	"\x05type2B\x06\n" +
-	"\x04data\"\x17\n" +
+	"\x04data\"H\n" +
+	"\x04Pull\x12!\n" +
+	"\fack_sequence\x18\x01 \x01(\x03R\vackSequence\x12\x1d\n" +
+	"\n" +
+	"pull_count\x18\x02 \x01(\x05R\tpullCount\"\x17\n" +
 	"\x03Sdp\x12\x10\n" +
 	"\x03sdp\x18\x02 \x01(\tR\x03sdp\"0\n" +
 	"\aConnect\x12!\n" +
-	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName:\x02\x18\x01\"l\n" +
-	"\x03Ack\x12*\n" +
-	"\x06status\x18\x01 \x01(\x0e2\x12.message.AckStatusR\x06status\x12\x16\n" +
+	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName:\x02\x18\x01\"p\n" +
+	"\x03Ack\x12.\n" +
+	"\x06status\x18\x01 \x01(\x0e2\x12.message.AckStatusB\x02\x18\x01R\x06status\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\x12!\n" +
 	"\n" +
 	"message_id\x18\x02 \x01(\tB\x02\x18\x01R\tmessageId\"^\n" +
@@ -906,38 +981,40 @@ func file_message_proto_rawDescGZIP() []byte {
 }
 
 var file_message_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_message_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_message_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_message_proto_goTypes = []any{
 	(MessageType)(0),     // 0: message.MessageType
 	(NormalType)(0),      // 1: message.NormalType
 	(AckStatus)(0),       // 2: message.AckStatus
 	(MessageUnitType)(0), // 3: message.MessageUnitType
 	(*Message)(nil),      // 4: message.Message
-	(*Sdp)(nil),          // 5: message.Sdp
-	(*Connect)(nil),      // 6: message.Connect
-	(*Ack)(nil),          // 7: message.Ack
-	(*Candidate)(nil),    // 8: message.Candidate
-	(*Chat)(nil),         // 9: message.Chat
-	(*MessageUnit)(nil),  // 10: message.MessageUnit
+	(*Pull)(nil),         // 5: message.Pull
+	(*Sdp)(nil),          // 6: message.Sdp
+	(*Connect)(nil),      // 7: message.Connect
+	(*Ack)(nil),          // 8: message.Ack
+	(*Candidate)(nil),    // 9: message.Candidate
+	(*Chat)(nil),         // 10: message.Chat
+	(*MessageUnit)(nil),  // 11: message.MessageUnit
 }
 var file_message_proto_depIdxs = []int32{
 	0,  // 0: message.Message.type:type_name -> message.MessageType
 	1,  // 1: message.Message.normal:type_name -> message.NormalType
 	2,  // 2: message.Message.ack_status:type_name -> message.AckStatus
-	7,  // 3: message.Message.ack:type_name -> message.Ack
-	6,  // 4: message.Message.connect:type_name -> message.Connect
-	8,  // 5: message.Message.candidate:type_name -> message.Candidate
-	9,  // 6: message.Message.chat:type_name -> message.Chat
-	5,  // 7: message.Message.call:type_name -> message.Sdp
-	5,  // 8: message.Message.answer:type_name -> message.Sdp
-	2,  // 9: message.Ack.status:type_name -> message.AckStatus
-	10, // 10: message.Chat.message_chain:type_name -> message.MessageUnit
-	3,  // 11: message.MessageUnit.type:type_name -> message.MessageUnitType
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	8,  // 3: message.Message.ack:type_name -> message.Ack
+	7,  // 4: message.Message.connect:type_name -> message.Connect
+	9,  // 5: message.Message.candidate:type_name -> message.Candidate
+	10, // 6: message.Message.chat:type_name -> message.Chat
+	6,  // 7: message.Message.call:type_name -> message.Sdp
+	6,  // 8: message.Message.answer:type_name -> message.Sdp
+	5,  // 9: message.Message.pull:type_name -> message.Pull
+	2,  // 10: message.Ack.status:type_name -> message.AckStatus
+	11, // 11: message.Chat.message_chain:type_name -> message.MessageUnit
+	3,  // 12: message.MessageUnit.type:type_name -> message.MessageUnitType
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_message_proto_init() }
@@ -954,6 +1031,7 @@ func file_message_proto_init() {
 		(*Message_Chat)(nil),
 		(*Message_Call)(nil),
 		(*Message_Answer)(nil),
+		(*Message_Pull)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -961,7 +1039,7 @@ func file_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_message_proto_rawDesc), len(file_message_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
